@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html><head>
+    <title>My Compiler</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" type="text/css" href="index_files/compiler.css">
+</head>
+<body onload="init();">
+    <h1>Matt Cember's Compiler Project</h1>
+    <p>
+        . . . <em>a simple parser for a simple man</em>:
+    </p>
+    <pre><table width="50%" cellpadding="0" cellspacing="10" border="0">
+    <tr>
+        <td width="50%" valign="top">
+            <p>Program		::== Statement <font color="GreenYellow">$</font>
+Statement	::== <font color="GreenYellow">print (</font> Expr <font color="GreenYellow">)</font>
+		::== Id <font color="GreenYellow">=</font> Expr
+		::== VarDecl
+		::== <font color="GreenYellow">{</font> StatementList <font color="GreenYellow">}</font>
+		::== WhileStatement
+		::== IfStatement
+WhileStatement  ::== <font color="GreenYellow">while</font> BooleanExpr <font color="GreenYellow">{</font> StatementList <font color="GreenYellow">}</font>
+IfStatement     ::== <font color="GreenYellow">if</font> BooleanExpr <font color="GreenYellow">{</font> StatementList <font color="GreenYellow">}</font>
+StatementList	::== Statement StatementList
+		::== null
+Expr 		::== IntExpr
+	        ::== BooleanExpr
+		::== StringExpr
+		::== Id
+IntExpr 	::== digit op Expr
+		::== digit
+</p>
+        </td>
+        <td width="50%" valign="top">
+            <p>
+StringExpr 	::== " CharList "
+BooleanExpr	::== <font color="GreenYellow">(</font> Expr <font color="GreenYellow">==</font> Expr <font color="GreenYellow">)</font>
+		::== boolVal
+CharList	::== char CharList
+		::== space Charlist
+		::== null
+VarDecl 	::== Type Id
+Type 		::== <font color="GreenYellow">int</font> | <font color="GreenYellow">string</font> | <font color="GreenYellow">boolean</font>
+Id 		::== char
+char 		::== <font color="GreenYellow">a</font> | <font color="GreenYellow">b</font> | <font color="GreenYellow">c ... z</font>
+digit 		::== <font color="GreenYellow">1</font> | <font color="GreenYellow">2</font> | <font color="GreenYellow">3</font> | <font color="GreenYellow">4</font> | <font color="GreenYellow">5</font> | <font color="GreenYellow">6</font> | <font color="GreenYellow">7</font> | <font color="GreenYellow">8</font> | <font color="GreenYellow">9</font> | <font color="GreenYellow">0</font>
+space		::== the <font color="GreenYellow">space</font> character
+boolVal		::== <font color="GreenYellow">false</font> | <font color="GreenYellow">true</font>
+op 		::== <font color="GreenYellow">+</font> | <font color="GreenYellow">-</font></p>
+        </td></tr></table></pre>
+<form>
+<input type="checkbox" checked = true name="lexbox" id="lexbox">Show Verbose Lex<br>
+<input type="checkbox" checked = true name="parsebox" id="parsebox">Show Verbose Parse
+<input type="checkbox" checked = true name="errorBox" id="errorDetail">Show Detailed Error Messages
+</form> 
+   <!-- </pre> -->
+ 
+    <div>
+        <textarea id="taSourceCode" cols="100" rows="18"></textarea>
+        <br>
+        <input id="btnCompile" value="Compile" onclick="btnCompile_click();" type="button">
+        <br>
+	<br>
+        <input id="testButton" value="Test" onclick="test_Func();" type="button">
+        <br>
+
+        
+	<textarea id="taOutput" cols="100" rows="18"></textarea>
+    </div>
+    <!-- Footer -->
+    <p>
+        <a href="http://validator.w3.org/check?uri=referer">
+            <img src="index_files/w3cvalidhtml5.jpg" alt="Valid HTML5" height="31" width="88">
+        </a>
+    </p>
+    <!-- Client-side code down here, per the YSlow advice. 
+    // (http://developer.yahoo.com/performance/rules.html#js_bottom) -->
+    <script type="text/javascript" src="index_files/utils.js"></script>	
+    <script type="text/javascript" src="index_files/parser.js"></script>
+	<script type="text/javascript" src="index_files/lexer.js"></script>
+	<script type="text/javascript" src="index_files/objects.js"></script>
+	<script type="text/javascript" src="index_files/AST.js"></script>
+	<script type="text/javascript" src="index_files/semanticAnalysis.js"></script>
+	<script type="text/javascript" src="index_files/codeGen.js"></script>	
+	<script type="text/javascript">
+
+
+
+    // Global variables
+	
+  	var tokens = new Array();
+	var symbols = new Array();
+	var nodes = new Array();
+	var ASTnodes = new Array();
+	var symbolNodes = new Array();
+	var tempVarNames = new Array();
+	var tempVars = new Array();
+	var codeGenWarnings = "";
+	var output = new Array(256);
+	var strings = new Array();
+	var tokenIndex = 0;
+	var maxPrintString = 0; //max length of print("stringExpr")
+   	var currentToken = "";
+	var lexErrorCount = 0;
+   	var parseErrorCount = 0;
+	var lexWarningCount = 0;
+	var semanticErrorCount = 0;
+	var warningCount = 0;
+    	var EOF = new token;
+	var lineNum = 1;
+	var verboseLex = true;
+	var verboseParse = true;
+	var errorDetail = true;
+	var buildASTstarted = false;
+  	var codePointer = 0; //pointer to where the code is being put
+	var heapPointer = 255;
+
+    //token data type
+	//list of token kinds:
+/*T_char
+T_digit
+T_leftParen
+T_rightParen
+T_leftBrace
+T_rightBrace
+T_op
+T_quote
+T_END
+T_equals
+T_P
+T_charType
+*/
+
+
+
+    function init()
+    {
+	codePointer = 0;
+	heapPointer = 255;
+	buildASTstarted = false;
+        // Clear the message box.
+        document.getElementById("taOutput").value = "";
+        // Set the initial values for our globals.
+	//currentSymbolNode = baseSymbolNode;
+	output = [];
+	tokens = [];
+	symbols = [];
+	nodes = [];
+	ASTnodes = [];
+	symbolNodes = [];
+	tempVarNames = [];
+	jumpVarNames = [];
+	tempVars = [];
+	jumpVars = [];
+	strings = [];
+	maxPrintString = 0;
+	nodeIndex = 0;
+	codeGenWarnings = "";
+	ASTnodeIndex = 0;
+	symbolNodeIndex = 0;
+        tokenIndex = 0;
+        currentToken = ' ';
+	lexErrorCount = 0;
+	lexWarningCount = 0;
+        parseErrorCount = 0;  
+	semanticErrorCount = 0;
+	warningCount = 0;
+	debugParseTree = "";
+	lineNum = 1;
+	var outOfTokens = false;
+    }
+
+
+	
+function test_Func()
+{
+//init();
+//testSymbolNodes();
+//fillTempVars();
+
+alert(numToString(5));
+}
+
+
+       
+    function btnCompile_click()
+    {        
+	verboseLex = document.getElementById("lexbox").checked;
+	verboseParse = document.getElementById("parsebox").checked;
+	        errorDetail = document.getElementById("errorDetail").checked;
+
+        
+		// This is executed as a result of the usr pressing the 
+        // "compile" button between the two text areas, above.  
+        // Note the <input> element's event handler: onclick="btnCompile_click();
+        init();
+//alert('compilation button pressed');
+        putMessage("Compilation Started");
+//alert('about to lex');
+        // Grab the tokens from the lexer . . .
+        lex();
+		if(lexErrorCount==0) //only parse if there are no lex errors
+		{
+		parse();
+		}
+	}
+    
+    function putMessage(msg)
+    {
+        document.getElementById("taOutput").value += msg + "\n";
+    }
+    
+    
+   
+    </script>
+
+
+</body></html>

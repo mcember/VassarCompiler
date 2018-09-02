@@ -1,0 +1,244 @@
+1. A loop that counts from 1 to 9. This incorporates both if statements and while loops
+	{
+	int a
+	int b
+	string c
+	c = " "
+	a = 1
+	b = 0
+	while(a==1)
+	{
+	b = 1 + b
+	if(b==9) 
+	{
+	c = " done looping"
+	a = 0
+	}
+	print(b)
+	print(c)
+	}
+	}
+output = 1 2 3 4 5 6 7 8 9 done looping
+
+
+1b. Infinite loop and booleans. Note that b = (b==false) is the same as b = !b
+	{
+	boolean a
+	a = true
+	boolean b
+	b = true
+	while (a == true)
+	{
+	if(b==true)
+	{
+	print("flip")
+	}
+	if(b==false)
+	{
+	print("flop")
+	}
+	b = (b == false)
+	}
+output = flipflopflipflopflip....
+
+
+2. counting above 100. Shows that the OS will only handle positive numbers up to 127
+	{
+	int a
+	int b
+	a = 1
+	b = 1
+	int c 
+	c = 0
+	int d
+	d = 0
+	while(b==1)
+	{
+	a = 9 + a
+	c = 1 + c
+	if(c==9)
+	{
+	if(d==1)
+	{
+	b = 0
+	}
+	d = 1
+	}
+	print(a)
+	}
+	}
+
+3. Demonstates scope
+	{
+	int a
+	a = 1
+	print(a)
+	{
+	a = 3
+	{
+	int a
+	a = 5
+	print(a)
+	}
+	}
+	print(a)
+	}
+output = 153
+
+4. Shows that strings can be reassigned to different lengths
+	{
+	string a 
+	a = "alan "
+	print(a)
+	a = "alana "
+	print(a)
+	a = "a long string"
+	print(a)
+	}
+output = alan alana a long string
+
+
+5. Shows that ints are initialized as 0, and strings as the empty string
+	{
+	int a
+	string b
+	print(a)
+	print(b)
+	}
+output = 0
+
+6. Shows that you can cascade addition
+	{
+	int a
+	a = 1 + 2 + 3 + 4 + 5 + 6 + 7 + 8 + 9 + a
+	print(a)
+	}
+output = 45
+
+7. Infinite loop!
+	{
+	string l
+	l = "loop"
+	while true
+	{
+	print(l)
+	}
+	}
+output = looplooplooploop...
+
+
+8. The bodies of If and While statements work like any other scope. 
+	{
+	int b
+	b = 9
+	string g
+	g = "global "
+	if true
+	{
+	string b
+	b = "local"
+	print(g)
+	}
+	print(b)
+	}
+output = global 9
+
+
+9. Boolean expressions:
+	{
+	boolean a
+	a = (1+3 == 0+2)
+	print(a)
+	}
+outputs '0'
+
+	{
+	boolean a
+	a = (1+1 == 0+2)
+	print(a)
+	}
+outputs '1'
+
+10. Print stringExpr:
+	{
+	print("stringy")
+	}
+output = stringy
+
+11. Also, print stringExpr's of different lengths
+	{
+	print("a ")
+	print("ab ")
+	print("abc ")
+	print("ab ")
+	print("a")
+	}
+output = a ab abc ab a
+
+12. Variable assignment to strings:
+	{
+	string a
+	a = "alan"
+	if (1 == 2)
+	{
+	a = "blackstone"
+	}
+	print(a)
+	}
+output = "alan"
+
+13. Using booleans as variables:
+	{
+	{
+	boolean a
+	a = false
+	print(a)
+	boolean b
+	b = true
+	print(b)
+	if (b == true)
+	{
+	print("b is true")
+	}
+	}
+output = 01b is true
+
+14. More booleans as variables:
+	{
+	boolean a
+	a = (true == false)
+	print(a)
+	a = (2 == 1+1)
+	print(a)
+	a = (a == a)
+	print(a)
+	}
+output = 011
+
+
+
+NOT WORKING/ISSUES WARNINGS
+1. Subtraction warning:
+{
+int a
+a = 6
+a = 1 - 2
+}
+
+
+2. Heap and code overlap:
+{
+string a
+a = "this string is way too long for so few bytes"
+print(a)
+}
+
+3. This is the only test I couldn't get working. I store a lot of values in the accumulator and S0XX, so I suspect that some value is getting lost somewhere.
+{
+boolean a
+a = ((1 == 1) == (2 == 2))
+print(a)
+}
+}
+
+
